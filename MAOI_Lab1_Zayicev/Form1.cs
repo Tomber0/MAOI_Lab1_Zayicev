@@ -12,9 +12,25 @@ namespace MAOI_Lab1_Zayicev
 {
     public partial class Form1 : Form
     {
+
+        ImageMatrix ImageMatrix;
         public object StrMatrix { get; set; }
+        public object MatrixHalfTone { get; set; }
 
+        public void UpdateIntencivityMatrix(double[][] arrayOfHalftone) 
+        {
+            dataGridView1.RowCount = arrayOfHalftone.Length;
+            dataGridView1.ColumnCount = arrayOfHalftone[0].Length;
+            for (int i = 0; i < arrayOfHalftone.Length; i++)
+            {
+                for (int j = 0; j < arrayOfHalftone[0].Length; j++)
+                {
+                    dataGridView1.Rows[i].Cells[j].Value = arrayOfHalftone[i][j];
+                }
+            }
 
+            //dataGridView1.Rows[0].Cells[0].Value = (DataGridView)MatrixHalfTone;
+        }
         public Form1()
         {
             InitializeComponent();
@@ -32,12 +48,15 @@ namespace MAOI_Lab1_Zayicev
              
                 image = new Bitmap(filePath);
                 pictureBox1.Image = image;
+                ImageMatrix = new ImageMatrix(image);
+                this.Text = $"Maoi_zayicev {openFileDialog1.SafeFileName}";
+                
             }
         }
         private void SetMatrix() 
         {
-            dataGridView1.ColumnCount = pictureBox1.Width;
-            dataGridView1.RowCount = pictureBox1.Height;
+            //dataGridView1.ColumnCount = pictureBox1.Width;
+           // dataGridView1.RowCount = pictureBox1.Height;
             
         }
         private bool CheckDialogResult(DialogResult result)  
@@ -66,81 +85,218 @@ namespace MAOI_Lab1_Zayicev
 
 
         }
-        private Color[][] GetPixelsFromImageToAnArray(Image image)
-        {
-            int height = image.Height;
-            int width = image.Width;
-            Bitmap imageBitmap = new Bitmap(image);
-            Color[][] imagePixels = new Color[width][];
-
-            for (int i = 0; i < width; i++)
-            {
-                imagePixels[i] = new Color[height];
-                for (int j = 0; j < height; j++)
-                {
-                    imagePixels[i][j] = imageBitmap.GetPixel(i, j);
-                }
-            }
-            return imagePixels;
-        }
-        private string[][] ConvertArraysOfColorToArrayOfStrings(Color[][] imageColorPixels)
-        {
-            string[][] imageStringPixels = new string[imageColorPixels.Length][];
-            for (int i = 0; i < imageColorPixels.Length; i++)
-            {
-                imageStringPixels[i] = new string[imageColorPixels[i].Length];
-                for (int j = 0; j < imageColorPixels[i].Length; j++)
-                {
-                    imageStringPixels[i][j] =$"{imageColorPixels[i][j].R},{imageColorPixels[i][j].G},{imageColorPixels[i][j].B}";
-                }
-            }
-            return imageStringPixels;
-        }
-        private Color[][] ConvertArraysOfStringToArrayOfColors(string[][] imageColorString)
-        {
-            string[][] imageStringPixels = new string[imageColorString.Length][];
-
-            Color[][] imageColorPixel = new Color[imageColorString.Length][];
-            for (int i = 0; i < imageColorString.Length; i++)
-            {
-                imageColorPixel[i] = new Color[imageColorString[i].Length];
-                for (int j = 0; j < imageColorString[i].Length; j++)
-                {
-                    //imageColorPixel[i][j] =  new Color();// $"{imageColorString[i][j].R},{imageColorString[i][j].G},{imageColorString[i][j].B}";
-                    //imageColorPixel[i][j].R = imageColorString[i][j]
-
-                    imageColorPixel[i][j] = GetColorFromString(imageColorString[i][j]);
-                }
-            }
-            return imageColorPixel;
-        }
-        private Color GetColorFromString(string colorString) 
-        {
-
-            string[] rGBstrings = colorString.Split(new char[] {',','\n' });
-            Color color = Color.FromArgb(
-                Convert.ToInt32(rGBstrings[0]),
-                Convert.ToInt32(rGBstrings[1]),
-                Convert.ToInt32(rGBstrings[2]));
-
-            return color;
         
-        }
         private void button1_Click(object sender, EventArgs e)
         {
+            dataGridView1.ColumnCount = pictureBox1.Image.Width;
+            dataGridView1.RowCount = pictureBox1.Image.Height;
+
+            FillGridWithStringMatrix(ImageMatrix.HalftoneMatrix);
+            BuildMatrixOfJointOccurencies(ImageMatrix.HalftoneMatrix);
+/*            ImageMatrix.
+*/
+            /*            Matrix matrixForm = new Matrix();
+                        matrixForm.ParentBaseForm = this;
+                        matrixForm.stringPixelMatrix = (string[][])StrMatrix;
+                        matrixForm.Show();
+            */
+
+        }
+        private void BuildMatrixOfJointOccurencies(string[][] halftoneMatrix) 
+        {
+            //d = 1
+            //& = 90*
+
+            //steps => 1. get all gradations
+            //2. build matrix accordingly :2.1: matrix size, caption;
+            //3.analys matrix and with function p(i,j,d,&) and fill matrix
 
 
-            string[][] abs =  ConvertArraysOfColorToArrayOfStrings( GetPixelsFromImageToAnArray(pictureBox1.Image));
-            ConvertArraysOfStringToArrayOfColors(abs);
+            List<int> gradations = new List<int>();
+            foreach (var item in halftoneMatrix)
+            {
+                foreach (var element in item)
+                {
+                    int elemInt = Convert.ToInt32(element);
+                    if(gradations.IndexOf(elemInt) == -1) 
+                    {
+                        gradations.Add(elemInt);              
+                    }
+                }
+            }
+
+            gradations.Sort();
+            
+            dataGridView2.ColumnCount = gradations.Count;
+            dataGridView2.RowCount = gradations.Count;
+            for (int i = 0; i < dataGridView2.ColumnCount; i++)
+            {
+                dataGridView2.Rows[i].HeaderCell.Value = gradations.ElementAt(i).ToString(); //i.ToString();
+                dataGridView2.Columns[i].HeaderCell.Value = gradations.ElementAt(i).ToString();//i.ToString();
+
+                //dataGridView2.Rows[i].HeaderCell.Value = i;
+            }
+            
+            int[][] arrayOfGradations = new int[gradations.Count][];
+            for (int i = 0; i < arrayOfGradations.Length; i++)
+            {
+                arrayOfGradations[i] = new int[gradations.Count]; 
+                for (int j = 0; j < arrayOfGradations[i].Length; j++)
+                {
+                    arrayOfGradations[i][j] = 0;
+                }
+            }
+            for (int i = 0; i < halftoneMatrix.Length; i++)
+            {
+                for (int j = 0; j < halftoneMatrix[i].Length; j++)
+                {
+                    if (j == 0)//change to (d-1)+cos(&) 
+                        //j => (d-1) +sin(&)
+                    { 
+                        continue; 
+                    }
+                    else
+                    {
+                        arrayOfGradations[gradations.IndexOf(Convert.ToInt32(halftoneMatrix[i][j-1]))]
+                            [gradations.IndexOf(Convert.ToInt32(halftoneMatrix[i][j]))]++;
+                    }
+                }
+            }
+
+            int sumOfGrad = 0;
+            for (int i = 0; i < dataGridView2.RowCount; i++)
+            {
+                for (int j = 0; j < dataGridView2.ColumnCount; j++)
+                {
+                    dataGridView2.Rows[i].Cells[j].Value = arrayOfGradations[i][j];
+                    sumOfGrad += arrayOfGradations[i][j];
+                }
+            }
+            double[][] arraysOfNormalsGrad = new double[gradations.Count][];
+            
+            dataGridView3.RowCount = dataGridView2.RowCount;
+            dataGridView3.ColumnCount = dataGridView2.ColumnCount;
+            for (int i = 0; i < dataGridView3.RowCount; i++)
+            {
+                arraysOfNormalsGrad[i] = new double[dataGridView3.ColumnCount];
+                for (int j = 0; j < dataGridView3.ColumnCount; j++)
+                {
+                    arraysOfNormalsGrad[i][j] =Math.Round( Convert.ToDouble( arrayOfGradations[i][j]) / sumOfGrad,3);
+                    dataGridView3.Rows[i].Cells[j].Value = arraysOfNormalsGrad[i][j];
+
+                }
+            }
+            SetPropertiesTable(arraysOfNormalsGrad);
 
 
-            this.StrMatrix = abs;
-            Matrix matrixForm = new Matrix();
-            matrixForm.ParentBaseForm = this;
-            matrixForm.stringPixelMatrix = (string[][])StrMatrix;
-            matrixForm.Show();
+        }
+        private void SetPropertiesTable(double[][] normalsArr) 
+        {
+            dataGridView4.RowCount = 4;
+            dataGridView4.ColumnCount = 2;
+
+            dataGridView4.Rows[0].Cells[0].Value = "Энергия";
+            dataGridView4.Rows[1].Cells[0].Value = "Энтропия";
+            dataGridView4.Rows[2].Cells[0].Value = "Контраст";
+            dataGridView4.Rows[3].Cells[0].Value = "Гомогенность";
+
+            dataGridView4.Rows[0].Cells[1].Value = GetPropertyEnergy(normalsArr);
+            dataGridView4.Rows[1].Cells[1].Value = GetPropertyEntropy(normalsArr);
+            dataGridView4.Rows[2].Cells[1].Value = GetPropertyContrast(normalsArr);
+            dataGridView4.Rows[3].Cells[1].Value = GetPropertyHomogeinty(normalsArr);
 
 
+
+        }
+        private string GetPropertyEnergy(double[][] normalsArr) 
+        {
+            double sum = 0;
+            foreach (var rows in normalsArr)
+            {
+                foreach (var item in rows)
+                {
+                    sum += Math.Pow(item,2);
+                }
+            }
+            return sum.ToString();
+        
+        }
+        private string GetPropertyEntropy(double[][] normalsArr)
+        {
+            double sum = 0;
+
+            for (int i = 0; i < normalsArr.Length; i++)
+            {
+
+                for (int j = 0; j < normalsArr[i].Length; j++)
+                {
+                    double log= Math.Log(normalsArr[i][j]+1, 2.0);
+                    sum += normalsArr[i][j] * log;
+                }
+            }
+
+            return (-sum).ToString();
+
+
+        }
+        private string GetPropertyContrast(double[][] normalsArr) 
+        {
+
+            double sum = 0;
+
+            for (int i = 0; i < normalsArr.Length; i++)
+            {
+
+                for (int j = 0; j < normalsArr[i].Length; j++)
+                {
+                    sum += normalsArr[i][j] * Math.Pow(i-j,2);
+                }
+            }
+
+            return sum.ToString();
+
+
+        }
+        private string GetPropertyHomogeinty(double[][] normalsArr) 
+        {
+
+            double sum = 0;
+
+            for (int i = 0; i < normalsArr.Length; i++)
+            {
+
+                for (int j = 0; j < normalsArr[i].Length; j++)
+                {
+                    sum += normalsArr[i][j] / (1 + Math.Abs(i -j));
+                }
+            }
+
+            return sum.ToString();
+        }
+
+
+        public void FillGridWithStringMatrix(string[][] givenMatrix) 
+        {
+            for (int i = 0; i < givenMatrix.Length; i++)
+            {
+                for (int j = 0; j < givenMatrix[i].Length; j++)
+                {
+                    dataGridView1.Columns[i].Width = 35;
+                    dataGridView1.Rows[j].Cells[i].Value = givenMatrix[i][j];
+                }
+            }
+        
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            SetMatrix();
+        }
+        
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            Form1 newForm = new Form1();
+            newForm.Show();
         }
     }
 }

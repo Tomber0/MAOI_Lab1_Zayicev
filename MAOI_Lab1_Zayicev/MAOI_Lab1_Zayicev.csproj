@@ -52,12 +52,14 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="ImageMatrix.cs" />
     <Compile Include="Matrix.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Matrix.Designer.cs">
       <DependentUpon>Matrix.cs</DependentUpon>
     </Compile>
+    <Compile Include="MatrixConverter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -74,6 +76,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -87,6 +90,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ico\New.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ico\Open.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ico\Save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ico\NewForm.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
